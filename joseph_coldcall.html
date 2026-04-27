@@ -1,0 +1,1763 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Joseph — Souffleur Cold Call</title>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<style>
+/* ── Reset & Base ──────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-primary: #0d1117;
+  --bg-secondary: #161b22;
+  --bg-card: #1c2128;
+  --bg-input: #21262d;
+  --border: #30363d;
+  --border-light: #3d444d;
+  --text-primary: #e6edf3;
+  --text-secondary: #8b949e;
+  --text-muted: #656d76;
+  --accent: #4493f8;
+  --accent-hover: #539bf5;
+  --accent-bg: rgba(68,147,248,0.12);
+  --danger: #f85149;
+  --danger-bg: rgba(248,81,73,0.1);
+  --danger-border: rgba(248,81,73,0.3);
+  --success: #3fb950;
+  --success-bg: rgba(63,185,80,0.1);
+  --warning: #d29922;
+  --warning-bg: rgba(210,153,34,0.1);
+  --radius: 8px;
+  --radius-lg: 12px;
+  --shadow: 0 2px 8px rgba(0,0,0,0.3);
+  --transition: 0.2s ease;
+}
+
+html { font-size: 15px; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ── Layout ────────────────────────────────────────────── */
+.container {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 24px 20px;
+}
+
+.screen { display: none; }
+.screen.active { display: block; }
+
+/* ── Cards ─────────────────────────────────────────────── */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  margin-bottom: 16px;
+}
+
+/* ── Buttons ───────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font-size: 0.93rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition);
+  text-decoration: none;
+}
+.btn:hover { background: var(--border); border-color: var(--border-light); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+
+.btn-danger {
+  background: var(--danger-bg);
+  border-color: var(--danger-border);
+  color: var(--danger);
+}
+.btn-danger:hover { background: rgba(248,81,73,0.2); }
+
+.btn-sm { padding: 6px 14px; font-size: 0.82rem; }
+
+.btn-group { display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* ── Pill buttons ──────────────────────────────────────── */
+.pill {
+  display: inline-block;
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all var(--transition);
+  text-align: left;
+}
+.pill:hover { background: var(--accent-bg); border-color: var(--accent); color: var(--accent); }
+
+/* ── Inputs ────────────────────────────────────────────── */
+input[type="text"], input[type="email"], input[type="password"], textarea {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-primary);
+  font-size: 0.93rem;
+  font-family: inherit;
+  transition: border-color var(--transition);
+}
+input:focus, textarea:focus { outline: none; border-color: var(--accent); }
+textarea { resize: vertical; min-height: 80px; }
+
+label {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.input-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+}
+.input-row .input-group { flex: 1; }
+.input-group { margin-bottom: 14px; }
+
+/* ── Header ────────────────────────────────────────────── */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.app-header h1 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.app-header h1 span { color: var(--accent); }
+.header-actions { display: flex; gap: 8px; }
+
+/* ── Progress bar ──────────────────────────────────────── */
+.progress-bar {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 28px;
+}
+.progress-step {
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--bg-input);
+  transition: background var(--transition);
+}
+.progress-step.done { background: var(--accent); }
+.progress-step.current { background: var(--accent); opacity: 0.6; }
+
+/* ── Onboarding ────────────────────────────────────────── */
+.step-title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.step-subtitle {
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+  margin-bottom: 20px;
+}
+
+.pitch-block {
+  background: var(--accent-bg);
+  border-left: 3px solid var(--accent);
+  padding: 16px 20px;
+  border-radius: 0 var(--radius) var(--radius) 0;
+  margin-bottom: 16px;
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+.accroche-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  margin-bottom: 10px;
+}
+.accroche-card .accroche-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 6px;
+}
+
+/* ── Objections table ──────────────────────────────────── */
+.objection-row {
+  display: grid;
+  grid-template-columns: 1fr 1.6fr;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+.objection-row:last-child { border-bottom: none; }
+.objection-label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--warning);
+}
+.objection-response { font-size: 0.9rem; line-height: 1.6; }
+
+/* ── Interdits ─────────────────────────────────────────── */
+.interdit-row {
+  display: grid;
+  grid-template-columns: 1fr 1.6fr;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.interdit-row:last-child { border-bottom: none; }
+.interdit-label {
+  color: var(--danger);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.interdit-redirect { font-size: 0.9rem; color: var(--text-secondary); }
+
+/* ── Quiz ──────────────────────────────────────────────── */
+.quiz-question {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+.quiz-options { display: flex; flex-direction: column; gap: 8px; }
+.quiz-option {
+  padding: 12px 16px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all var(--transition);
+  font-size: 0.9rem;
+}
+.quiz-option:hover { border-color: var(--accent); background: var(--accent-bg); }
+.quiz-option.correct {
+  border-color: var(--success);
+  background: var(--success-bg);
+  cursor: default;
+}
+.quiz-option.wrong {
+  border-color: var(--danger);
+  background: var(--danger-bg);
+  cursor: default;
+}
+.quiz-option.disabled { pointer-events: none; opacity: 0.5; }
+.quiz-feedback {
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  font-size: 0.88rem;
+}
+.quiz-feedback.correct { background: var(--success-bg); color: var(--success); }
+.quiz-feedback.wrong { background: var(--danger-bg); color: var(--danger); }
+
+/* ── Nav onboarding ────────────────────────────────────── */
+.step-nav {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+/* ── Assistant ─────────────────────────────────────────── */
+.assistant-topbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.mic-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font-size: 1.3rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+.mic-btn.active {
+  border-color: var(--danger);
+  background: var(--danger-bg);
+  color: var(--danger);
+  animation: pulse-border 1.5s ease-in-out infinite;
+}
+@keyframes pulse-border {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(248,81,73,0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(248,81,73,0); }
+}
+.mic-status {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+.mic-status.active { color: var(--danger); font-weight: 500; }
+
+.stage-select {
+  margin-left: auto;
+  padding: 8px 12px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  font-family: inherit;
+  cursor: pointer;
+}
+.stage-select:focus { outline: none; border-color: var(--accent); }
+.stage-select option { background: var(--bg-secondary); }
+
+/* ── Interdits banner ──────────────────────────────────── */
+.interdits-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: var(--danger-bg);
+  border: 1px solid var(--danger-border);
+  border-radius: var(--radius);
+  margin-bottom: 12px;
+  font-size: 0.82rem;
+  color: var(--danger);
+  line-height: 1.5;
+}
+
+/* ── Transcription zone ────────────────────────────────── */
+.transcription-zone {
+  height: 80px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  margin-bottom: 12px;
+  overflow-y: auto;
+  font-size: 0.93rem;
+  display: flex;
+  align-items: flex-start;
+}
+.transcription-zone .interim { color: var(--text-muted); font-style: italic; }
+.transcription-zone .final { color: var(--text-primary); }
+.transcription-zone .placeholder { color: var(--text-muted); font-style: italic; }
+
+/* ── Tabs ──────────────────────────────────────────────── */
+.tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 16px;
+}
+.tab {
+  padding: 10px 20px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all var(--transition);
+  background: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  font-family: inherit;
+}
+.tab:hover { color: var(--text-primary); }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ── Souffleur messages ────────────────────────────────── */
+.messages {
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 4px 0;
+}
+.message {
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+}
+.message.prospect { align-items: flex-start; }
+.message.souffleur { align-items: flex-end; }
+
+.message-bubble {
+  max-width: 85%;
+  padding: 10px 16px;
+  border-radius: var(--radius-lg);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  position: relative;
+}
+.message.prospect .message-bubble {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-bottom-left-radius: 4px;
+}
+.message.souffleur .message-bubble {
+  background: var(--accent-bg);
+  border: 1px solid rgba(68,147,248,0.25);
+  border-bottom-right-radius: 4px;
+}
+.message-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+.message.prospect .message-label { color: var(--text-muted); }
+.message.souffleur .message-label { color: var(--accent); }
+
+.copy-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  padding: 3px 8px;
+  font-size: 0.72rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+.message-bubble:hover .copy-btn { opacity: 1; }
+.copy-btn:hover { color: var(--text-primary); border-color: var(--border-light); }
+
+/* ── Loading dots ──────────────────────────────────────── */
+.loading-dots {
+  display: inline-flex;
+  gap: 4px;
+  padding: 8px 0;
+}
+.loading-dots span {
+  width: 6px;
+  height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+  animation: dot-pulse 1.2s ease-in-out infinite;
+}
+.loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+.loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes dot-pulse {
+  0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+  40% { opacity: 1; transform: scale(1); }
+}
+
+/* ── Objections rapides ────────────────────────────────── */
+.pills-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* ── Invitation zone ───────────────────────────────────── */
+.invitation-zone {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+.invite-confirm {
+  margin-top: 10px;
+  font-size: 0.88rem;
+  color: var(--success);
+  display: none;
+}
+.invite-confirm.visible { display: block; }
+
+/* ── Report ────────────────────────────────────────────── */
+.report-section {
+  margin-bottom: 20px;
+}
+.report-section h3 {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 8px;
+}
+.report-section p, .report-section ul {
+  font-size: 0.93rem;
+  line-height: 1.7;
+}
+.report-section ul { padding-left: 20px; }
+.report-section li { margin-bottom: 4px; }
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+.status-badge.froid { background: var(--bg-input); color: var(--text-secondary); }
+.status-badge.tiede { background: var(--warning-bg); color: var(--warning); }
+.status-badge.chaud { background: rgba(248,81,73,0.15); color: #ff8a80; }
+.status-badge.invite { background: var(--success-bg); color: var(--success); }
+
+/* ── Settings Modal ────────────────────────────────────── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 200;
+  justify-content: center;
+  align-items: center;
+}
+.modal-overlay.active { display: flex; }
+.modal {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  width: 480px;
+  max-width: 95vw;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow);
+}
+.modal h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+.modal-section {
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.modal-section:last-of-type { border-bottom: none; }
+.modal-section h3 {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+/* ── Misc ──────────────────────────────────────────────── */
+.score-display {
+  text-align: center;
+  padding: 20px;
+}
+.score-display .score {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+.score-display .score-label {
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+}
+
+.recap-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  font-size: 0.9rem;
+}
+.recap-check {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--success-bg);
+  color: var(--success);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+}
+
+.separator { height: 1px; background: var(--border); margin: 16px 0; }
+
+.text-center { text-align: center; }
+.mt-16 { margin-top: 16px; }
+.mb-8 { margin-bottom: 8px; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- HEADER                                                 -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<header class="app-header">
+  <h1><span>J</span>oseph — Souffleur</h1>
+  <div class="header-actions">
+    <button class="btn btn-sm" onclick="openSettings()">Parametres</button>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SETTINGS MODAL                                         -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal">
+    <h2>Parametres</h2>
+    <div class="modal-section">
+      <h3>API Anthropic</h3>
+      <div class="input-group">
+        <label for="apiKey">Cle API</label>
+        <input type="password" id="apiKey" placeholder="sk-ant-...">
+      </div>
+      <p style="font-size:0.78rem;color:var(--text-muted);">
+        La cle est stockee localement dans votre navigateur.
+      </p>
+    </div>
+    <div class="modal-section">
+      <h3>EmailJS (invitations prospect)</h3>
+      <div class="input-group">
+        <label for="emailjsKey">Public Key</label>
+        <input type="text" id="emailjsKey" placeholder="votre_public_key">
+      </div>
+      <div class="input-group">
+        <label for="emailjsService">Service ID</label>
+        <input type="text" id="emailjsService" placeholder="service_xxx">
+      </div>
+      <div class="input-group">
+        <label for="emailjsTemplate">Template ID</label>
+        <input type="text" id="emailjsTemplate" placeholder="template_xxx">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeSettings()">Annuler</button>
+      <button class="btn btn-primary" onclick="saveSettings()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SCREEN 1 — ONBOARDING                                  -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div id="screen-onboarding" class="screen active">
+  <div class="container">
+    <div class="progress-bar" id="onboardingProgress"></div>
+    <div id="onboardingContent"></div>
+    <div class="step-nav">
+      <button class="btn" id="btnPrev" onclick="prevStep()">Precedent</button>
+      <button class="btn btn-primary" id="btnNext" onclick="nextStep()">Suivant</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SCREEN 2 — ASSISTANT D'APPEL                           -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div id="screen-assistant" class="screen">
+  <div class="container">
+
+    <!-- Topbar -->
+    <div class="card" style="padding:14px 20px;">
+      <div class="assistant-topbar">
+        <button class="mic-btn" id="micBtn" onclick="toggleMic()" title="Activer/desactiver le micro">
+          <svg id="micIcon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+        </button>
+        <span class="mic-status" id="micStatus">Micro arrete</span>
+        <select class="stage-select" id="callStage" onchange="updateStage()">
+          <option value="accroche">Accroche initiale</option>
+          <option value="decouverte">Decouverte du besoin</option>
+          <option value="pitch">Pitch Joseph</option>
+          <option value="objection">Gestion d'objection</option>
+          <option value="closing">Closing</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Banniere interdits -->
+    <div class="interdits-banner">
+      <span style="font-size:1.1rem;">&#128683;</span>
+      <span>Ne jamais dire : Modeles IA utilises &middot; "Prototype" ou "beta" &middot; Nommer un concurrent &middot; Prix ou delais sans validation</span>
+    </div>
+
+    <!-- Transcription -->
+    <div class="transcription-zone" id="transcriptionZone">
+      <span class="placeholder">Activez le micro pour commencer...</span>
+    </div>
+
+    <!-- Tabs -->
+    <div class="card" style="padding:0;">
+      <div class="tabs">
+        <button class="tab active" data-tab="souffleur" onclick="switchTab('souffleur')">Souffleur IA</button>
+        <button class="tab" data-tab="manual" onclick="switchTab('manual')">Saisie manuelle</button>
+        <button class="tab" data-tab="objections" onclick="switchTab('objections')">Objections rapides</button>
+      </div>
+      <div style="padding:16px 20px;">
+
+        <!-- Tab: Souffleur -->
+        <div class="tab-content active" id="tab-souffleur">
+          <div class="messages" id="messagesContainer">
+            <div class="empty-state">Les suggestions apparaitront ici pendant l'appel.</div>
+          </div>
+          <div id="loadingIndicator" style="display:none;">
+            <div class="loading-dots"><span></span><span></span><span></span></div>
+          </div>
+        </div>
+
+        <!-- Tab: Manuel -->
+        <div class="tab-content" id="tab-manual">
+          <div class="input-row">
+            <div class="input-group" style="margin-bottom:0;">
+              <input type="text" id="manualInput" placeholder="Ce que le prospect vient de dire..." onkeydown="if(event.key==='Enter')sendManual()">
+            </div>
+            <button class="btn btn-primary" onclick="sendManual()" style="height:42px;">Souffler</button>
+          </div>
+        </div>
+
+        <!-- Tab: Objections rapides -->
+        <div class="tab-content" id="tab-objections">
+          <div class="pills-grid" id="quickObjections"></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Invitation -->
+    <div class="card">
+      <div class="invitation-zone" style="border-top:none;padding-top:0;">
+        <label style="font-size:0.9rem;font-weight:600;color:var(--text-primary);margin-bottom:10px;">Invitation prospect</label>
+        <div class="input-row">
+          <div class="input-group" style="margin-bottom:0;">
+            <input type="email" id="prospectEmail" placeholder="email@prospect.com">
+          </div>
+          <button class="btn btn-primary" onclick="sendInvite()" style="height:42px;white-space:nowrap;">Envoyer l'acces Joseph</button>
+        </div>
+        <div class="invite-confirm" id="inviteConfirm"></div>
+      </div>
+    </div>
+
+    <!-- Fin d'appel -->
+    <div class="text-center mt-16">
+      <button class="btn btn-danger" onclick="endCall()">Terminer l'appel</button>
+      <button class="btn btn-sm" style="margin-left:10px;" onclick="replayOnboarding()">Rejouer l'onboarding</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SCREEN 3 — COMPTE-RENDU                                -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div id="screen-report" class="screen">
+  <div class="container">
+    <div class="card">
+      <h2 style="font-size:1.15rem;font-weight:600;margin-bottom:20px;">Compte-rendu de l'appel</h2>
+      <div id="reportContent">
+        <div class="empty-state">
+          <div class="loading-dots"><span></span><span></span><span></span></div>
+          <p style="margin-top:10px;">Generation du compte-rendu...</p>
+        </div>
+      </div>
+    </div>
+    <div class="btn-group" style="justify-content:center;margin-top:20px;">
+      <button class="btn btn-primary" onclick="newCall()">Nouvel appel</button>
+      <button class="btn" onclick="replayOnboarding()">Rejouer l'onboarding</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- JAVASCRIPT                                             -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<script>
+/* ═══════════════════════════════════════════════════════════
+   CONFIG — Modifier ici le contenu sans toucher au code
+   ═══════════════════════════════════════════════════════════ */
+const CONFIG = {
+
+  pitch: {
+    description: `Joseph c'est quelque chose qui n'existait pas jusqu'ici. On vous offre un audit métier complet — le genre de mission que font les Big Four, entre 50 et 100 000 euros — et il est gratuit. Pourquoi ? Parce que c'est lui qui permet à Joseph de créer votre outil sur mesure. Ça dure entre 5 et 7 jours, chaque département avance à son rythme, sans contrainte. Et à l'arrivée : une plateforme faite exactement pour vous, intégrée à vos données, opérationnelle dès le premier jour.`,
+
+    accroches: [
+      {
+        label: "B — L'exclusivité",
+        text: `Bonjour [Prénom], on fait quelque chose que personne d'autre ne propose encore : on offre à des dirigeants comme vous un audit métier de niveau grand cabinet — gratuit, sans engagement. Je vous explique en deux minutes ?`
+      },
+      {
+        label: "C — Les Excel",
+        text: `Bonjour [Prénom], vous faites tourner combien de fichiers Excel dans votre boîte en ce moment ? Je pose la question parce qu'on a construit quelque chose pour ça — et je pense que ça va vous surprendre.`
+      },
+      {
+        label: "D — La crédibilité",
+        text: `Bonjour [Prénom], je vous contacte de la part de Joseph — deux ans de R&D, des anciens de grands cabinets de conseil, des docteurs de Polytechnique spécialisés en systèmes complexes. On s'attaque à un problème précis : les dirigeants qui pilotent encore à l'aveugle. Une minute pour vous dire comment ?`
+      }
+    ],
+
+    closing: `Ce que je vous propose c'est simple : je vous envoie votre accès Joseph là maintenant, pendant qu'on se parle. Vous allez recevoir un mail dans 30 secondes. Vous testez par vous-même — sans engagement, ça commence à 60 euros par utilisateur par mois, vous arrêtez quand vous voulez. Il n'y a pas mieux que tester pour voir. Votre email c'est lequel ?`
+  },
+
+  objections: [
+    { objection: "C'est trop cher", response: `Joseph vous coûtera au maximum ce que vous payez déjà aujourd'hui en outils et en temps perdu. Et en face, un outil qui s'adapte à 120% de ce que vous faites — y compris des choses que vous n'avez pas encore imaginées. Fini les Excel, fini les angles morts. Et ça commence à 60 euros par utilisateur par mois, sans engagement.` },
+    { objection: "On a déjà des outils", response: `Joseph ne remplace pas — il absorbe. Tout ce que vous avez, il s'y connecte et comble ce que vos outils ne couvrent pas. Et c'est souvent là que les entreprises perdent le plus.` },
+    { objection: "Pourquoi vous faire confiance ?", response: `Deux ans de R&D, des executives issus des grands cabinets de conseil, deux docteurs de Polytechnique spécialisés en systèmes complexes, et un ancien directeur des opérations SaaS. C'est une équipe qui connaît vos problèmes de l'intérieur.` },
+    { objection: "J'ai pas le temps", response: `30 minutes, et si c'est pas pertinent je serai le premier à vous le dire. Mais si ça l'est — et c'est souvent le cas — vous allez vous demander pourquoi vous avez attendu.` },
+    { objection: "Rappelle-moi plus tard", response: `Pas de souci. Plutôt début ou fin de semaine prochaine ?` },
+    { objection: "Comment ça marche ?", response: `C'est construit sur les meilleures technologies IA du moment — deux ans de R&D pour ça. Ce que je peux vous dire c'est le résultat : un outil livré vite, qui vous ressemble, et qui évolue avec vous.` },
+    { objection: "Quel IA vous utilisez ?", response: `On s'appuie sur les meilleures technologies du marché — je ne suis pas en mesure d'en dire plus. Ce qui compte c'est ce que ça produit pour vous.` }
+  ],
+
+  interdits: [
+    { interdit: "Les modèles IA utilisés (Claude, GPT…)", redirect: `On s'appuie sur les meilleures technologies du marché — c'est tout ce que je peux dire.` },
+    { interdit: '"Prototype" ou "bêta"', redirect: `Toujours : outil / plateforme / solution` },
+    { interdit: "Nommer un concurrent pour comparer", redirect: `Joseph n'est pas comparable — c'est du sur-mesure, pas un outil générique.` },
+    { interdit: "Prix ou délai précis sans validation", redirect: `Le diagnostic nous permet de vous proposer quelque chose de précis — c'est justement pour ça qu'on le fait.` }
+  ],
+
+  quiz: [
+    {
+      question: 'Le prospect demande : "Quel IA fait tourner Joseph ?"',
+      options: [
+        "On utilise Claude d'Anthropic, c'est le meilleur du marché.",
+        "C'est un mélange de GPT et Claude, très performant.",
+        "On s'appuie sur les meilleures technologies du marché — je ne suis pas en mesure d'en dire plus. Ce qui compte c'est ce que ça produit pour vous.",
+        "C'est notre propre IA développée en interne."
+      ],
+      correct: 2,
+      feedback_correct: "Parfait ! On ne révèle jamais les modèles IA utilisés.",
+      feedback_wrong: "Attention — on ne révèle JAMAIS les modèles IA. La bonne réponse : rediriger vers le résultat."
+    },
+    {
+      question: 'Le prospect dit : "C\'est trop cher."',
+      options: [
+        "Joseph vous coûtera au maximum ce que vous payez déjà aujourd'hui en outils et en temps perdu. Fini les Excel, fini les angles morts. Et ça commence à 60 euros par utilisateur par mois, sans engagement.",
+        "On peut faire un geste commercial si vous signez aujourd'hui.",
+        "C'est vrai que c'est un investissement, mais pensez au ROI sur 3 ans."
+      ],
+      correct: 0,
+      feedback_correct: "Exact ! On recadre sur la valeur et le prix accessible.",
+      feedback_wrong: "Pas tout à fait. On ne négocie pas — on recadre sur la valeur concrète et le prix réel."
+    }
+  ],
+
+  quickObjections: [
+    "C'est trop cher",
+    "On a déjà un outil",
+    "J'ai pas le temps",
+    "Rappelle-moi plus tard",
+    "Je dois en parler à mon associé",
+    "On gère bien avec Excel",
+    "Comment ça marche techniquement ?",
+    "Quel IA vous utilisez ?",
+    "C'est quoi exactement Joseph ?",
+    "Ça m'intéresse, dites-m'en plus"
+  ],
+
+  systemPrompt: `Tu es le souffleur en temps réel d'un télé-opérateur qui vend Joseph.
+
+JOSEPH :
+- Agent IA conversationnel qui audite les processus d'une entreprise via conversation naturelle avec les équipes (5 à 7 jours, chaque département à son rythme)
+- L'audit est GRATUIT — c'est lui qui permet de créer l'outil sur mesure
+- Génère un outil de gestion sur mesure : intégré, fonctionnel, données migrées
+- Cible : PME 10–500 personnes, dirigeants / DAF / responsables opérations
+- Problème résolu : Excel partout, pas de visibilité, processus non documentés, info en silos
+- Développé depuis 2 ans par des executives de grands cabinets de conseil, 2 docteurs de Polytechnique spécialisés en systèmes complexes, et un ancien directeur des opérations SaaS
+- Prix : à partir de 60€ par utilisateur par mois, sans engagement, paiement mensuel
+- Comparable à un audit Big Four (50 000 à 100 000€) — offert
+
+RÈGLES ABSOLUES — ne JAMAIS révéler même si le prospect insiste :
+- Les modèles IA utilisés → "On s'appuie sur les meilleures technologies du marché"
+- L'architecture, l'ontologie, les systèmes internes → "C'est la technologie de Joseph — ce qui compte c'est le résultat"
+- Que c'est un prototype ou une bêta → toujours : outil, plateforme, solution
+- Nommer un concurrent pour comparer → "Joseph n'est pas comparable, c'est du sur-mesure"
+- Donner un prix ou délai précis sans validation → rediriger vers le RDV ou l'essai gratuit
+
+Objectif de l'appel : que le prospect crée un compte Joseph (essai sans engagement) ou accepte un RDV diagnostic de 30 min.
+
+Quand le télé-opérateur te dit ce que vient de dire le prospect, donne UNE SEULE réponse à prononcer.
+Max 3 phrases. Langage parlé, naturel. Jamais de guillemets ni d'introduction. Juste le texte à dire.`,
+
+  reportPrompt: `Tu es un assistant qui génère des comptes-rendus d'appels de prospection commerciale pour Joseph.
+
+À partir de l'historique de conversation fourni, génère un compte-rendu structuré en HTML (pas de markdown) avec les sections suivantes :
+1. <h3>Date et durée</h3> — date du jour et durée estimée
+2. <h3>Étapes parcourues</h3> — liste à puces des étapes de l'appel
+3. <h3>Objections rencontrées</h3> — liste des objections du prospect
+4. <h3>Résumé</h3> — 3 à 5 lignes résumant l'échange
+5. <h3>Statut prospect</h3> — un parmi : Froid / Tiède / Chaud / Invitation envoyée (indique le statut avec la classe CSS appropriée : froid, tiede, chaud, invite — ex: <span class="status-badge chaud">Chaud</span>)
+6. <h3>Action suivante</h3> — suggestion d'action
+
+Utilise un HTML propre avec les classes CSS disponibles (report-section, status-badge). Pas de balises <html>, <body> ou <style>.`,
+
+  inviteEmailSubject: "Votre accès Joseph — audit métier gratuit",
+  inviteEmailBody: `Bonjour,\n\nSuite à notre échange, voici votre accès à Joseph.\n\nJoseph va auditer vos processus métier via des conversations naturelles avec vos équipes — entre 5 et 7 jours, chaque département à son rythme.\n\nÀ l'arrivée : un outil de gestion sur mesure, intégré à vos données, opérationnel dès le premier jour.\n\nCliquez ici pour démarrer : [LIEN]\n\nÀ très vite,\nL'équipe Joseph`,
+
+  anthropicModel: "claude-haiku-4-5-20251001",
+  silenceDelay: 2200,
+  minTranscriptLength: 8,
+
+  /* ── CLÉS API — à remplir ici avant de donner le fichier à Fabien ── */
+  apiKey: "",
+  emailjsPublicKey: "",        // EmailJS Public Key
+  emailjsServiceId: "",        // EmailJS Service ID
+  emailjsTemplateId: ""        // EmailJS Template ID
+};
+
+/* ═══════════════════════════════════════════════════════════
+   STATE
+   ═══════════════════════════════════════════════════════════ */
+const state = {
+  currentStep: 0,
+  totalSteps: 6,
+  quizAnswers: [null, null],
+  quizScore: 0,
+  onboardingDone: false,
+  // Assistant
+  micActive: false,
+  callStage: 'accroche',
+  messages: [],       // {role: 'prospect'|'souffleur', text: ''}
+  callStartTime: null,
+  inviteSent: false,
+  inviteEmail: '',
+  currentTranscript: '',
+  silenceTimer: null,
+  recognition: null,
+  isGenerating: false
+};
+
+/* ═══════════════════════════════════════════════════════════
+   HELPERS
+   ═══════════════════════════════════════════════════════════ */
+function $(id) { return document.getElementById(id); }
+function show(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); $(id).classList.add('active'); }
+
+function getApiKey() { return CONFIG.apiKey || localStorage.getItem('joseph_api_key') || ''; }
+function setApiKey(k) { localStorage.setItem('joseph_api_key', k); }
+function getEmailConfig() {
+  return {
+    publicKey: CONFIG.emailjsPublicKey || localStorage.getItem('joseph_emailjs_key') || '',
+    serviceId: CONFIG.emailjsServiceId || localStorage.getItem('joseph_emailjs_service') || '',
+    templateId: CONFIG.emailjsTemplateId || localStorage.getItem('joseph_emailjs_template') || ''
+  };
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SETTINGS
+   ═══════════════════════════════════════════════════════════ */
+function openSettings() {
+  $('apiKey').value = getApiKey();
+  const ec = getEmailConfig();
+  $('emailjsKey').value = ec.publicKey;
+  $('emailjsService').value = ec.serviceId;
+  $('emailjsTemplate').value = ec.templateId;
+  $('settingsModal').classList.add('active');
+}
+
+function closeSettings() { $('settingsModal').classList.remove('active'); }
+
+function saveSettings() {
+  setApiKey($('apiKey').value.trim());
+  localStorage.setItem('joseph_emailjs_key', $('emailjsKey').value.trim());
+  localStorage.setItem('joseph_emailjs_service', $('emailjsService').value.trim());
+  localStorage.setItem('joseph_emailjs_template', $('emailjsTemplate').value.trim());
+  // Init EmailJS if key provided
+  const pk = $('emailjsKey').value.trim();
+  if (pk && window.emailjs) emailjs.init(pk);
+  closeSettings();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ONBOARDING
+   ═══════════════════════════════════════════════════════════ */
+function renderProgress() {
+  const bar = $('onboardingProgress');
+  bar.innerHTML = '';
+  for (let i = 0; i < state.totalSteps; i++) {
+    const div = document.createElement('div');
+    div.className = 'progress-step' + (i < state.currentStep ? ' done' : i === state.currentStep ? ' current' : '');
+    bar.appendChild(div);
+  }
+}
+
+function renderStep() {
+  renderProgress();
+  const c = $('onboardingContent');
+  const s = state.currentStep;
+
+  // Nav buttons
+  $('btnPrev').style.visibility = s === 0 ? 'hidden' : 'visible';
+  if (s === state.totalSteps - 1) {
+    $('btnNext').textContent = 'Demarrer l\'assistant d\'appel →';
+    $('btnNext').className = 'btn btn-primary';
+  } else {
+    $('btnNext').textContent = 'Suivant';
+    $('btnNext').className = 'btn btn-primary';
+  }
+
+  // Disable next on quiz until answered
+  if (s === 4) {
+    $('btnNext').disabled = !(state.quizAnswers[0] !== null && state.quizAnswers[1] !== null);
+  } else {
+    $('btnNext').disabled = false;
+  }
+
+  switch (s) {
+    case 0: renderStep1(c); break;
+    case 1: renderStep2(c); break;
+    case 2: renderStep3(c); break;
+    case 3: renderStep4(c); break;
+    case 4: renderStep5(c); break;
+    case 5: renderStep6(c); break;
+  }
+}
+
+function renderStep1(c) {
+  c.innerHTML = `
+    <p class="step-title">Description de Joseph</p>
+    <p class="step-subtitle">Memorisez ce pitch de 30 secondes</p>
+    <div class="pitch-block">${CONFIG.pitch.description}</div>
+    <div class="separator"></div>
+    <p class="step-title mb-8" style="font-size:1rem;">Accroches d'ouverture</p>
+    <p class="step-subtitle">3 options au choix pour demarrer l'appel</p>
+    ${CONFIG.pitch.accroches.map(a => `
+      <div class="accroche-card">
+        <div class="accroche-label">${a.label}</div>
+        <div>${a.text}</div>
+      </div>
+    `).join('')}
+  `;
+}
+
+function renderStep2(c) {
+  c.innerHTML = `
+    <p class="step-title">Reponses aux objections classiques</p>
+    <p class="step-subtitle">Apprenez les reponses adaptees a chaque objection</p>
+    <div class="card" style="padding:0 20px;">
+      ${CONFIG.objections.map(o => `
+        <div class="objection-row">
+          <div class="objection-label">"${o.objection}"</div>
+          <div class="objection-response">${o.response}</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function renderStep3(c) {
+  c.innerHTML = `
+    <p class="step-title">Closing et invitation</p>
+    <p class="step-subtitle">La phrase de closing + le flow d'invitation</p>
+    <div class="pitch-block">${CONFIG.pitch.closing}</div>
+    <div class="card mt-16">
+      <p style="font-weight:600;margin-bottom:8px;">Flow d'invitation</p>
+      <p style="font-size:0.9rem;color:var(--text-secondary);line-height:1.7;">
+        Pendant l'appel, quand le prospect est pret :<br>
+        1. Vous saisissez son email dans le champ prevu<br>
+        2. Vous cliquez sur "Envoyer l'acces Joseph"<br>
+        3. L'invitation part automatiquement<br>
+        4. Confirmation affichee a l'ecran
+      </p>
+    </div>
+  `;
+}
+
+function renderStep4(c) {
+  c.innerHTML = `
+    <p class="step-title">Ce qu'on ne dit JAMAIS</p>
+    <p class="step-subtitle">Interdits absolus avec les formules de redirection</p>
+    <div class="card" style="padding:0 20px;">
+      ${CONFIG.interdits.map(i => `
+        <div class="interdit-row">
+          <div class="interdit-label">${i.interdit}</div>
+          <div class="interdit-redirect">${i.redirect}</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function renderStep5(c) {
+  const answered = state.quizAnswers.filter(a => a !== null).length;
+  const total = CONFIG.quiz.length;
+  c.innerHTML = `
+    <p class="step-title">Quiz</p>
+    <p class="step-subtitle">Verifiez que vous etes pret</p>
+    <p class="quiz-progress" id="quizProgress" style="font-size:0.82rem;color:var(--text-muted);margin-bottom:16px;">
+      ${answered < total ? `Repondez aux ${total} questions pour continuer (${answered}/${total})` : `${total}/${total} — vous pouvez continuer`}
+    </p>
+    ${CONFIG.quiz.map((q, qi) => `
+      <div class="card" id="quiz-${qi}">
+        <div class="quiz-question">${qi + 1}. ${q.question}</div>
+        <div class="quiz-options">
+          ${q.options.map((opt, oi) => `
+            <div class="quiz-option" data-qi="${qi}" data-oi="${oi}" onclick="answerQuiz(${qi},${oi})">${opt}</div>
+          `).join('')}
+        </div>
+        <div class="quiz-feedback" id="quiz-feedback-${qi}" style="display:none;"></div>
+      </div>
+    `).join('')}
+  `;
+  // Restore state if already answered
+  CONFIG.quiz.forEach((q, qi) => {
+    if (state.quizAnswers[qi] !== null) {
+      applyQuizAnswer(qi, state.quizAnswers[qi]);
+    }
+  });
+}
+
+function answerQuiz(qi, oi) {
+  if (state.quizAnswers[qi] !== null) return;
+  state.quizAnswers[qi] = oi;
+  applyQuizAnswer(qi, oi);
+
+  // Update progress indicator
+  const answered = state.quizAnswers.filter(a => a !== null).length;
+  const total = CONFIG.quiz.length;
+  const prog = $('quizProgress');
+  if (prog) {
+    if (answered < total) {
+      prog.textContent = `Repondez aux ${total} questions pour continuer (${answered}/${total})`;
+    } else {
+      prog.textContent = `${total}/${total} — vous pouvez continuer`;
+      prog.style.color = 'var(--success)';
+    }
+  }
+
+  // Check if all answered
+  if (state.quizAnswers.every(a => a !== null)) {
+    state.quizScore = state.quizAnswers.reduce((s, a, i) => s + (a === CONFIG.quiz[i].correct ? 1 : 0), 0);
+    $('btnNext').disabled = false;
+  } else {
+    // Scroll to next unanswered question
+    const nextUnanswered = state.quizAnswers.findIndex(a => a === null);
+    if (nextUnanswered !== -1) {
+      const el = $(`quiz-${nextUnanswered}`);
+      if (el) setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'center' }), 400);
+    }
+  }
+}
+
+function applyQuizAnswer(qi, oi) {
+  const q = CONFIG.quiz[qi];
+  const container = $(`quiz-${qi}`);
+  const options = container.querySelectorAll('.quiz-option');
+  options.forEach((opt, i) => {
+    if (i === q.correct) opt.classList.add('correct');
+    else if (i === oi && oi !== q.correct) opt.classList.add('wrong');
+    if (i !== q.correct && i !== oi) opt.classList.add('disabled');
+    opt.style.pointerEvents = 'none';
+  });
+  const fb = $(`quiz-feedback-${qi}`);
+  fb.style.display = 'block';
+  if (oi === q.correct) {
+    fb.className = 'quiz-feedback correct';
+    fb.textContent = q.feedback_correct;
+  } else {
+    fb.className = 'quiz-feedback wrong';
+    fb.textContent = q.feedback_wrong;
+  }
+}
+
+function renderStep6(c) {
+  const score = state.quizScore;
+  const total = CONFIG.quiz.length;
+  c.innerHTML = `
+    <p class="step-title">Recapitulatif</p>
+    <p class="step-subtitle">Vous etes pret pour votre premier appel</p>
+    <div class="card">
+      <div class="score-display">
+        <div class="score">${score}/${total}</div>
+        <div class="score-label">Score au quiz</div>
+      </div>
+      <div class="separator"></div>
+      <div style="padding:0 8px;">
+        <div class="recap-item"><span class="recap-check">&#10003;</span> Pitch 30 secondes</div>
+        <div class="recap-item"><span class="recap-check">&#10003;</span> 3 accroches d'ouverture</div>
+        <div class="recap-item"><span class="recap-check">&#10003;</span> ${CONFIG.objections.length} reponses aux objections</div>
+        <div class="recap-item"><span class="recap-check">&#10003;</span> Phrases de closing</div>
+        <div class="recap-item"><span class="recap-check">&#10003;</span> ${CONFIG.interdits.length} interdits memorises</div>
+      </div>
+    </div>
+  `;
+  $('btnNext').textContent = 'Demarrer l\'assistant d\'appel →';
+}
+
+function nextStep() {
+  if (state.currentStep < state.totalSteps - 1) {
+    state.currentStep++;
+    renderStep();
+    window.scrollTo(0, 0);
+  } else {
+    startAssistant();
+  }
+}
+
+function prevStep() {
+  if (state.currentStep > 0) {
+    state.currentStep--;
+    renderStep();
+    window.scrollTo(0, 0);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ASSISTANT — Init
+   ═══════════════════════════════════════════════════════════ */
+function startAssistant() {
+  state.onboardingDone = true;
+  if (!getApiKey()) {
+    openSettings();
+    alert('Veuillez configurer votre cle API Anthropic pour utiliser le souffleur.');
+    return;
+  }
+  resetAssistant();
+  show('screen-assistant');
+  renderQuickObjections();
+}
+
+function resetAssistant() {
+  state.micActive = false;
+  state.messages = [];
+  state.callStartTime = new Date();
+  state.inviteSent = false;
+  state.inviteEmail = '';
+  state.currentTranscript = '';
+  state.isGenerating = false;
+  clearTimeout(state.silenceTimer);
+  if (state.recognition) {
+    try { state.recognition.stop(); } catch(e) {}
+  }
+  $('micBtn').classList.remove('active');
+  $('micStatus').textContent = 'Micro arrete';
+  $('micStatus').classList.remove('active');
+  $('transcriptionZone').innerHTML = '<span class="placeholder">Activez le micro pour commencer...</span>';
+  $('messagesContainer').innerHTML = '<div class="empty-state">Les suggestions apparaitront ici pendant l\'appel.</div>';
+  $('loadingIndicator').style.display = 'none';
+  $('inviteConfirm').classList.remove('visible');
+  $('inviteConfirm').textContent = '';
+  $('prospectEmail').value = '';
+  $('callStage').value = 'accroche';
+  state.callStage = 'accroche';
+}
+
+function renderQuickObjections() {
+  $('quickObjections').innerHTML = CONFIG.quickObjections.map(o =>
+    `<button class="pill" onclick="sendQuickObjection(this.textContent)">${o}</button>`
+  ).join('');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SPEECH RECOGNITION
+   ═══════════════════════════════════════════════════════════ */
+function initRecognition() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    alert('La reconnaissance vocale n\'est pas supportee par votre navigateur. Utilisez Chrome.');
+    return null;
+  }
+  const recog = new SpeechRecognition();
+  recog.continuous = true;
+  recog.interimResults = true;
+  recog.lang = 'fr-FR';
+
+  let finalText = '';
+  let interimText = '';
+
+  recog.onresult = (event) => {
+    finalText = '';
+    interimText = '';
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const transcript = event.results[i][0].transcript;
+      if (event.results[i].isFinal) {
+        finalText += transcript;
+      } else {
+        interimText += transcript;
+      }
+    }
+    // Update transcription zone
+    const zone = $('transcriptionZone');
+    zone.innerHTML = '';
+    if (finalText) {
+      const sp = document.createElement('span');
+      sp.className = 'final';
+      sp.textContent = finalText;
+      zone.appendChild(sp);
+    }
+    if (interimText) {
+      const sp = document.createElement('span');
+      sp.className = 'interim';
+      sp.textContent = (finalText ? ' ' : '') + interimText;
+      zone.appendChild(sp);
+    }
+
+    state.currentTranscript = (finalText + ' ' + interimText).trim();
+
+    // Reset silence timer
+    clearTimeout(state.silenceTimer);
+    state.silenceTimer = setTimeout(() => {
+      const t = state.currentTranscript.trim();
+      if (t.length >= CONFIG.minTranscriptLength && !state.isGenerating) {
+        triggerSouffleur(t);
+        // Clear transcript for next turn
+        state.currentTranscript = '';
+        finalText = '';
+        interimText = '';
+      }
+    }, CONFIG.silenceDelay);
+  };
+
+  recog.onerror = (event) => {
+    console.warn('Speech recognition error:', event.error);
+    if (event.error === 'no-speech') return; // Ignore no-speech
+    if (event.error === 'aborted') return;
+  };
+
+  recog.onend = () => {
+    // Restart if mic is still supposed to be on
+    if (state.micActive) {
+      try { recog.start(); } catch(e) {}
+    }
+  };
+
+  return recog;
+}
+
+function toggleMic() {
+  if (state.micActive) {
+    state.micActive = false;
+    if (state.recognition) {
+      try { state.recognition.stop(); } catch(e) {}
+    }
+    clearTimeout(state.silenceTimer);
+    $('micBtn').classList.remove('active');
+    $('micStatus').textContent = 'Micro arrete';
+    $('micStatus').classList.remove('active');
+  } else {
+    if (!state.recognition) {
+      state.recognition = initRecognition();
+      if (!state.recognition) return;
+    }
+    state.micActive = true;
+    try { state.recognition.start(); } catch(e) {
+      // May already be started
+      try { state.recognition.stop(); state.recognition.start(); } catch(e2) {}
+    }
+    $('micBtn').classList.add('active');
+    $('micStatus').textContent = 'Ecoute en cours...';
+    $('micStatus').classList.add('active');
+    $('transcriptionZone').innerHTML = '<span class="placeholder">En attente de parole...</span>';
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SOUFFLEUR AI
+   ═══════════════════════════════════════════════════════════ */
+function addMessage(role, text) {
+  state.messages.push({ role, text });
+  renderMessages();
+}
+
+function renderMessages() {
+  const container = $('messagesContainer');
+  if (state.messages.length === 0) {
+    container.innerHTML = '<div class="empty-state">Les suggestions apparaitront ici pendant l\'appel.</div>';
+    return;
+  }
+  container.innerHTML = state.messages.map((m, i) => `
+    <div class="message ${m.role}">
+      <div class="message-label">${m.role === 'prospect' ? 'Prospect' : 'Souffleur'}</div>
+      <div class="message-bubble" id="bubble-${i}">
+        ${m.text}
+        ${m.role === 'souffleur' && !m.streaming ? `<button class="copy-btn" onclick="copyText(${i})">Copier</button>` : ''}
+      </div>
+    </div>
+  `).join('');
+  container.scrollTop = container.scrollHeight;
+}
+
+function copyText(idx) {
+  const text = state.messages[idx]?.text;
+  if (text) {
+    navigator.clipboard.writeText(text).then(() => {
+      const allBtns = $('messagesContainer').querySelectorAll('.copy-btn');
+      const souffleurIdx = state.messages.slice(0, idx + 1).filter(m => m.role === 'souffleur').length - 1;
+      if (allBtns[souffleurIdx]) {
+        allBtns[souffleurIdx].textContent = 'Copie !';
+        setTimeout(() => { allBtns[souffleurIdx].textContent = 'Copier'; }, 1500);
+      }
+    });
+  }
+}
+
+async function triggerSouffleur(prospectText) {
+  if (state.isGenerating) return;
+  state.isGenerating = true;
+
+  addMessage('prospect', prospectText);
+
+  // Switch to souffleur tab
+  switchTab('souffleur');
+
+  // Add empty streaming souffleur bubble
+  const msgIdx = state.messages.length;
+  state.messages.push({ role: 'souffleur', text: '', streaming: true });
+  renderMessages();
+
+  try {
+    await callAnthropicStream(buildSouffleurMessages(prospectText), (delta) => {
+      state.messages[msgIdx].text += delta;
+      const bubble = $(`bubble-${msgIdx}`);
+      if (bubble) {
+        bubble.textContent = state.messages[msgIdx].text;
+        $('messagesContainer').scrollTop = $('messagesContainer').scrollHeight;
+      }
+    });
+
+    // Streaming done — show copy button
+    state.messages[msgIdx].streaming = false;
+    const bubble = $(`bubble-${msgIdx}`);
+    if (bubble) {
+      const btn = document.createElement('button');
+      btn.className = 'copy-btn';
+      btn.textContent = 'Copier';
+      btn.onclick = () => copyText(msgIdx);
+      bubble.appendChild(btn);
+    }
+  } catch (err) {
+    console.error('Souffleur error:', err);
+    state.messages[msgIdx].text = '(Erreur — verifiez votre cle API dans les parametres)';
+    state.messages[msgIdx].streaming = false;
+    renderMessages();
+  }
+
+  state.isGenerating = false;
+}
+
+function buildSouffleurMessages(latestProspect) {
+  const stageLabel = $('callStage').selectedOptions[0]?.textContent || state.callStage;
+  const msgs = [];
+
+  // Keep only last 3 exchanges (6 messages max) to reduce tokens
+  const recent = state.messages.slice(-6);
+  for (const m of recent) {
+    if (m.role === 'prospect') {
+      msgs.push({ role: 'user', content: `[Prospect dit] ${m.text}` });
+    } else if (m.role === 'souffleur') {
+      msgs.push({ role: 'assistant', content: m.text });
+    }
+  }
+
+  // Replace last user message with stage context, or add it
+  if (msgs.length > 0 && msgs[msgs.length - 1].role === 'user') {
+    msgs[msgs.length - 1] = {
+      role: 'user',
+      content: `[Étape : ${stageLabel}] [Prospect dit] ${latestProspect}`
+    };
+  } else {
+    msgs.push({
+      role: 'user',
+      content: `[Étape : ${stageLabel}] [Prospect dit] ${latestProspect}`
+    });
+  }
+
+  return msgs;
+}
+
+async function callAnthropicStream(messages, onDelta) {
+  const apiKey = getApiKey();
+  if (!apiKey) throw new Error('No API key');
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: CONFIG.anthropicModel,
+      max_tokens: 150,
+      stream: true,
+      system: CONFIG.systemPrompt,
+      messages: messages
+    })
+  });
+
+  if (!res.ok) {
+    const errBody = await res.text();
+    throw new Error(`API ${res.status}: ${errBody}`);
+  }
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop();
+    for (const line of lines) {
+      if (!line.startsWith('data: ')) continue;
+      const json = line.slice(6);
+      if (json === '[DONE]') return;
+      try {
+        const event = JSON.parse(json);
+        if (event.type === 'content_block_delta' && event.delta?.text) {
+          onDelta(event.delta.text);
+        }
+      } catch (e) {}
+    }
+  }
+}
+
+async function callAnthropicNonStream(messages, systemPrompt) {
+  const apiKey = getApiKey();
+  if (!apiKey) throw new Error('No API key');
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: CONFIG.anthropicModel,
+      max_tokens: 1000,
+      system: systemPrompt,
+      messages: messages
+    })
+  });
+
+  if (!res.ok) {
+    const errBody = await res.text();
+    throw new Error(`API ${res.status}: ${errBody}`);
+  }
+
+  const data = await res.json();
+  return data.content?.[0]?.text || '(Pas de reponse)';
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MANUAL INPUT & QUICK OBJECTIONS
+   ═══════════════════════════════════════════════════════════ */
+function sendManual() {
+  const input = $('manualInput');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  triggerSouffleur(text);
+}
+
+function sendQuickObjection(text) {
+  switchTab('souffleur');
+  // Look up instant response from CONFIG objections
+  const match = CONFIG.objections.find(o => o.objection === text);
+  if (match) {
+    addMessage('prospect', text);
+    state.messages.push({ role: 'souffleur', text: match.response, streaming: false });
+    renderMessages();
+  } else {
+    triggerSouffleur(text);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TABS
+   ═══════════════════════════════════════════════════════════ */
+function switchTab(tabName) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tabName));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.toggle('active', t.id === `tab-${tabName}`));
+}
+
+function updateStage() {
+  state.callStage = $('callStage').value;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   INVITATION EMAIL
+   ═══════════════════════════════════════════════════════════ */
+async function sendInvite() {
+  const email = $('prospectEmail').value.trim();
+  if (!email || !email.includes('@')) {
+    alert('Veuillez entrer un email valide.');
+    return;
+  }
+
+  const ec = getEmailConfig();
+  if (!ec.publicKey || !ec.serviceId || !ec.templateId) {
+    alert('Configurez EmailJS dans les parametres pour envoyer des invitations.');
+    openSettings();
+    return;
+  }
+
+  try {
+    if (window.emailjs) {
+      emailjs.init(ec.publicKey);
+      await emailjs.send(ec.serviceId, ec.templateId, {
+        to_email: email,
+        subject: CONFIG.inviteEmailSubject,
+        message: CONFIG.inviteEmailBody,
+        from_name: 'Joseph'
+      });
+    }
+
+    state.inviteSent = true;
+    state.inviteEmail = email;
+    const confirm = $('inviteConfirm');
+    confirm.textContent = `Invitation envoyee a ${email} ✓`;
+    confirm.classList.add('visible');
+  } catch (err) {
+    console.error('Email error:', err);
+    alert('Erreur lors de l\'envoi. Verifiez votre configuration EmailJS.');
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   END CALL & REPORT
+   ═══════════════════════════════════════════════════════════ */
+async function endCall() {
+  // Stop mic
+  if (state.micActive) toggleMic();
+
+  show('screen-report');
+  $('reportContent').innerHTML = `
+    <div class="empty-state">
+      <div class="loading-dots"><span></span><span></span><span></span></div>
+      <p style="margin-top:10px;">Generation du compte-rendu...</p>
+    </div>
+  `;
+
+  const duration = state.callStartTime
+    ? Math.round((new Date() - state.callStartTime) / 60000)
+    : 0;
+
+  const historyText = state.messages.map(m =>
+    `${m.role === 'prospect' ? 'PROSPECT' : 'SOUFFLEUR'}: ${m.text}`
+  ).join('\n');
+
+  const reportInput = `
+Date : ${new Date().toLocaleDateString('fr-FR')}
+Durée estimée : ${duration} minute${duration > 1 ? 's' : ''}
+Étape de l'appel : ${$('callStage').selectedOptions[0]?.textContent || state.callStage}
+Invitation envoyée : ${state.inviteSent ? 'Oui (' + state.inviteEmail + ')' : 'Non'}
+
+Historique de la conversation :
+${historyText || '(Aucun échange enregistré)'}
+  `.trim();
+
+  try {
+    const html = await callAnthropicNonStream(
+      [{ role: 'user', content: reportInput }],
+      CONFIG.reportPrompt
+    );
+    $('reportContent').innerHTML = html || '<p>Impossible de generer le compte-rendu.</p>';
+  } catch (err) {
+    console.error('Report error:', err);
+    $('reportContent').innerHTML = `
+      <div class="report-section">
+        <h3>Date et duree</h3>
+        <p>${new Date().toLocaleDateString('fr-FR')} — ~${duration} min</p>
+      </div>
+      <div class="report-section">
+        <h3>Historique</h3>
+        ${state.messages.length > 0
+          ? '<ul>' + state.messages.map(m => `<li><strong>${m.role === 'prospect' ? 'Prospect' : 'Souffleur'}:</strong> ${m.text}</li>`).join('') + '</ul>'
+          : '<p>Aucun echange enregistre.</p>'
+        }
+      </div>
+      <div class="report-section">
+        <h3>Statut</h3>
+        <span class="status-badge ${state.inviteSent ? 'invite' : 'tiede'}">${state.inviteSent ? 'Invitation envoyee' : 'Tiede'}</span>
+      </div>
+      <p style="color:var(--text-muted);font-size:0.82rem;margin-top:12px;">(Compte-rendu simplifie — erreur API lors de la generation)</p>
+    `;
+  }
+}
+
+function newCall() {
+  resetAssistant();
+  show('screen-assistant');
+}
+
+function replayOnboarding() {
+  if (state.micActive) toggleMic();
+  state.currentStep = 0;
+  state.quizAnswers = [null, null];
+  state.quizScore = 0;
+  renderStep();
+  show('screen-onboarding');
+  window.scrollTo(0, 0);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   INIT
+   ═══════════════════════════════════════════════════════════ */
+(function init() {
+  renderStep();
+
+  // Init EmailJS if configured
+  const ec = getEmailConfig();
+  if (ec.publicKey && window.emailjs) {
+    emailjs.init(ec.publicKey);
+  }
+
+  // Check for API key on load
+  if (state.onboardingDone && !getApiKey()) {
+    openSettings();
+  }
+})();
+</script>
+</body>
+</html>
