@@ -654,16 +654,6 @@ label {
   <div class="modal">
     <h2>Parametres</h2>
     <div class="modal-section">
-      <h3>API Anthropic</h3>
-      <div class="input-group">
-        <label for="apiKey">Cle API</label>
-        <input type="password" id="apiKey" placeholder="sk-ant-...">
-      </div>
-      <p style="font-size:0.78rem;color:var(--text-muted);">
-        La cle est stockee localement dans votre navigateur.
-      </p>
-    </div>
-    <div class="modal-section">
       <h3>EmailJS (invitations prospect)</h3>
       <div class="input-group">
         <label for="emailjsKey">Public Key</label>
@@ -1511,17 +1501,9 @@ function buildSouffleurMessages(latestProspect) {
 }
 
 async function callAnthropicStream(messages, onDelta) {
-  const apiKey = getApiKey();
-  if (!apiKey) throw new Error('No API key');
-
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
+  const res = await fetch('/api/chat', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true'
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model: CONFIG.anthropicModel,
       max_tokens: 150,
@@ -1561,17 +1543,9 @@ async function callAnthropicStream(messages, onDelta) {
 }
 
 async function callAnthropicNonStream(messages, systemPrompt) {
-  const apiKey = getApiKey();
-  if (!apiKey) throw new Error('No API key');
-
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
+  const res = await fetch('/api/chat', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true'
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model: CONFIG.anthropicModel,
       max_tokens: 1000,
@@ -1753,10 +1727,6 @@ function replayOnboarding() {
     emailjs.init(ec.publicKey);
   }
 
-  // Check for API key on load
-  if (state.onboardingDone && !getApiKey()) {
-    openSettings();
-  }
 })();
 </script>
 </body>
